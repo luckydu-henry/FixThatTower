@@ -8,8 +8,8 @@ include_directories("vendor/glad/include")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Add source files
-file(GLOB_RECURSE TOWER_SOURCES FILES "./src/*.c" "./src/*.cpp")
-file(GLOB_RECURSE GLAD_SOURCES  FILES "./vendor/glad/src/*.c")
+file(GLOB_RECURSE TOWER_SOURCES FILES "./src/*.c" "./src/*.cpp" "./include/*.hpp")
+file(GLOB_RECURSE GLAD_SOURCES  FILES "./vendor/glad/src/*.c" "./vendor/glad/include/*.h")
 
 # Copy resources to the build directory.
 add_custom_target(copy_resources ALL
