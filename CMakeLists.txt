@@ -1,31 +1,26 @@
-cmake_minimum_required(VERSION 3.15)
-project(IvoryTower VERSION 0.1.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.16)
+project(renderer_module VERSION 1.0
+                        DESCRIPTION "Small but quick renderer with modern C++20"
+                        LANGUAGES C CXX)
 
-add_subdirectory("vendor/glfw")
-# Add VULKAN_SDK include and lib directories.
+find_package(Vulkan REQUIRED)
+add_subdirectory(vendor/glfw)
 
-include_directories("vendor/glad/include")
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+file(GLOB RDMD_HEADER  "include/*.hpp")
+file(GLOB RDMD_SOURCE  "src/*.cpp")
 
-# Add source files
-file(GLOB_RECURSE TOWER_SOURCES FILES "./src/*.c" "./src/*.cpp" "./include/*.hpp")
-file(GLOB_RECURSE GLAD_SOURCES  FILES "./vendor/glad/src/*.c" "./vendor/glad/include/*.h")
+add_library               (librdmd STATIC ${RDMD_HEADER} ${RDMD_SOURCE} "vendor/stb/stb.cpp")
+target_compile_features   (librdmd STATIC cxx_std_20)
+# To add force just simply add its include folder.
+target_include_directories(librdmd STATIC "include/" "vendor/force/include/" "vendor/stb/stb.hpp")
+target_link_libraries     (glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
 
-# Copy resources to the build directory.
-add_custom_target(copy_resources ALL
-                  COMMAND ${CMAKE_COMMAND} -E copy_directory
-                  ${PROJECT_SOURCE_DIR}/res
-                  ${PROJECT_BINARY_DIR}/res
-                  COMMENT "Copying resources into binary folder")
-
-# Ivory tower game settings.
-add_executable       (TowerGame ${TOWER_SOURCES} ${GLAD_SOURCES})
-set_target_properties(TowerGame PROPERTIES 
-                                CXX_STANDARD 20)
-# Add glfw to game project.
-target_link_libraries      (TowerGame PRIVATE glfw)
-
-add_dependencies(TowerGame copy_resources)
-
-# Set startup project as TowerGame for MSVC but not ALL_BUILD
-set_property         (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT TowerGame)
+file(GLOB EXAMPLE_SOURCES "example/*.cpp")
+foreach(src ${EXAMPLE_SOURCES})
+    get_filename_component(src_name ${src} NAME_WE)
+    add_executable            (${src_name} ${src})
+    target_compile_features   (${src_name} PUBLIC cxx_std_20)
+    target_include_directories(${src_name} PUBLIC "include/" "vendor/force/include/")
+    target_link_libraries     (${src_name} PUBLIC )
+    set_target_properties     (${src_name} PROPERTIES FOLDER "example")
+endforeach(src ${EXAMPLE_SOURCES})
