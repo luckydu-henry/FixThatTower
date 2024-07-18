@@ -1,4 +1,6 @@
 build/
-res/glsl/
+res/*.spv
+*.png
+*.jpg
 .vs/
 .vscode/
